@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+     http://www.springframework.org/schema/jee
+       http://www.springframework.org/schema/jee/spring-jee-2.5.xsd"
+       default-autowire="byName">
+
+    <context:component-scan base-package="com.thd" />
+
+    <bean class="com.thd.jm.quartz.SchedulerFactoryBeanBefore">
+        <property name="triggers" ref="initTrigger"/>
+        <property name="startupDelay" value="0"/>
+        <property name="defaultCorpCode" value="default"/>
+    </bean>
+
+    <bean id="initTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="initJobDetail"/>
+        <property name="cronExpression" value="0 0/1 * * * ?"/>
+    </bean>
+
+    <bean id="initJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="quartzJobTrigger"/>
+        <property name="targetMethod" value="initJobTrigger"/>
+        <property name="concurrent" value="false" />
+    </bean>
+
+    <bean id="quartzJobTrigger" class="com.thd.jm.quartz.QuartzJobTrigger">
+        <property name="initTriggerName" value="initTrigger"/>
+        <property name="initJobDetailName" value="initJobDetail"/>
+
+        <property name="cycleUpdateTime" value="0/30 * * * * ?"/>
+    </bean>
+</beans>

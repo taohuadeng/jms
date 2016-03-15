@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="taskJob" class="com.thd.jm.task.SpringTask"/>
+
+	<bean id="taskScheduled"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!-- 调用的类 -->
+		<property name="targetObject" ref="taskJob"/>
+		<!-- 调用类中的方法 -->
+		<property name="targetMethod" value="work"/>
+	</bean>
+
+	<!-- 定义触发时间 -->
+	<bean id="taskDoTime" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<!-- cron表达式 -->
+		<property name="jobDetail" ref="taskScheduled"/>
+		<property name="cronExpression" value="* * * * * ?"/>
+	</bean>
+
+	<!-- 总管理类 如果将lazy-init='false'那么容器启动就会执行调度程序 -->
+	<bean id="startQuertz" lazy-init="true"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="taskDoTime" />
+			</list>
+		</property>
+		<!-- 启动服务后多少秒后开始执行 -->
+		<!--<property name="startupDelay" value="10" />-->
+	</bean>
+
+</beans>
